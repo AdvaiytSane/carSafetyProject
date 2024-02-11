@@ -5,6 +5,7 @@ from RiskAssessment import RiskAssessment
 cap = cv2.VideoCapture(1)
 temperature = 90
 
+# only do this while temperature is above 80
 while (temperature > 80):
     ret, frame = cap.read()
     ass = RiskAssessment(81, frame)
