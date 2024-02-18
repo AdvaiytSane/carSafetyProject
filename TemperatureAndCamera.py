@@ -5,6 +5,7 @@ from picamera2 import Picamera2
 import RPi.GPIO as gpio
 import dht11
 import lcd_1602
+from RiskAssessment import RiskAssessment
 
 lcd_1602.init(0x27, 1)
 
@@ -19,7 +20,7 @@ piCam.preview_configuration.main.format = "RGB888"
 piCam.preview_configuration.align()
 piCam.configure("preview")
 piCam.start()  
-
+riskAss = RiskAssessment()
 try:
     while True:
         # print("attempted reading at :", time.time())
@@ -31,13 +32,19 @@ try:
             print("Temperature is " , t, h," at ", time.time())
             lcd_1602.write(0,0, "Temp is {0}".format(t))
             
+        lcd_1602.write(0,1, "potential danger")
+        frame =  piCam.capture_array()
+        riskAss.update(t, frame)
+        face_locations = riskAss.get_face()
+        if riskAss.is_face():
+            print("baby detected and temperature above 80 degrees! Please check your car. ")
+            for x, y, w, h  in face_locations:
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        cv2.imshow("piCam", frame)
 
-        if 1 > 0:
-            lcd_1602.write(0,1, "potential danger")
-            frame =  piCam.capture_array()
-            cv2.imshow("piCam", frame)
-            if cv2.waitKey(1) == ord('q'):
-                break
+        if cv2.waitKey(1) == ord('q'):
+            break
+
         time.sleep(0.2)
 
 except KeyboardInterrupt:
