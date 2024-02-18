@@ -6,6 +6,7 @@ from picamera2 import Picamera2
 import RPi.GPIO as gpio
 import dht11
 import lcd_1602
+import RiskAssessment as RA
 
 def update_temperature_humidity():
     # Simulated temperature and humidity values
@@ -29,9 +30,18 @@ def update_video_frame():
     video_label.configure(image=imgtk)
     video_label.after(100, update_video_frame)
 
+def update_baby_status():
+    riskAss.update(frame = piCam.capture_array)
+    isFace = riskAss.is_face()
+ 
+    
+
+
 lcd_1602.init(0x27, 1)
 gpio.setmode(gpio.BCM)
 myDHT = dht11.DHT11(pin = 17)
+
+riskAss = RA()
 
 piCam = Picamera2()
 piCam.preview_configuration.main.size = (1280, 720)
@@ -46,7 +56,8 @@ root.title("Temperature, Humidity, and Video Display")
 # Create labels for temperature/humidity and video frame
 temperature = 25.5
 humidity = 60.0
-TH_text = tk.StringVar(value=f"Temperature: {temperature}�C\nHumidity: {humidity}%")
+isFace = False
+TH_text = tk.StringVar(value=f"Temperature: {temperature}�C\nHumidity: {humidity}%\nIs Face: {isFace}")
 
 temperature_label = ttk.Label(root, font=("Helvetica", 12),textvariable=TH_text)
 temperature_label.pack(side = tk.LEFT,ipadx=30, ipady=6)
@@ -57,5 +68,6 @@ video_label.pack(side = tk.RIGHT,ipadx=30, ipady=6)
 # Start updating temperature/humidity and video frame
 update_temperature_humidity()
 update_video_frame()
+update_baby_status()
 
 root.mainloop()

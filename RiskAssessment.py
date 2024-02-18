@@ -1,4 +1,5 @@
 import cv2
+
 class RiskAssessment:
     def __init__(self, temp=None, frame=None):
         self.temp = temp
@@ -17,7 +18,7 @@ class RiskAssessment:
     def get_face(self):
         return self.face
     
-    def update(self, temp, frame):
+    def update(self, temp = None, frame = None):
         self.temp = temp
         self.frame = frame
         gray_image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)       
