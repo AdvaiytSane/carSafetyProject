@@ -57,7 +57,7 @@ root.title("Temperature, Humidity, and Video Display")
 temperature = 25.5
 humidity = 60.0
 isFace = False
-TH_text = tk.StringVar(value=f"Temperature: {temperature}�C\nHumidity: {humidity}%\nIs Face: {isFace}")
+TH_text = tk.StringVar(value=f"Temperature: {temperature}ºC\nHumidity: {humidity}%\nIs Face: {isFace}")
 
 temperature_label = ttk.Label(root, font=("Helvetica", 12),textvariable=TH_text)
 temperature_label.pack(side = tk.LEFT,ipadx=30, ipady=6)
