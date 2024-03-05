@@ -2,65 +2,92 @@ import tkinter as tk
 import cv2
 from tkinter import ttk
 from PIL import Image, ImageTk
-from picamera2 import Picamera2
-import RPi.GPIO as gpio
-import dht11
-import lcd_1602
-import RiskAssessment as RA
+import random
+import sounddevice as sd
 
 def update_temperature_humidity():
-    # Simulated temperature and humidity values
-    result = myDHT.read()
-    if result.is_valid():
-        temperature = result.temperature
-        humidity = result.humidity
-        print(f"Temperature: {temperature}�C\nHumidity: {humidity}%")
-        TH_text.set(value=f"Temperature: {temperature}�C\nHumidity: {humidity}%")
-
-    # temperature_label.config(text=f"Temperature: {temperature}�C\nHumidity: {humidity}%")
-    temperature_label.after(100, update_temperature_humidity)
+    # Simulated temperature and humidity values (update with real values)
+    temperature = random.random()*5 + 20
+    humidity = random.random()*5 + 60
+    TH_text.set(value=f"Temperature: {temperature:3.1f}°C\nHumidity: {humidity:3.1f}%")
+    # temperature_label.config(text=f"Temperature: {temperature}°C\nHumidity: {humidity}%")
+    temperature_label.after(10000, update_temperature_humidity)
 
 def update_video_frame():
-    # _, frame = cap.read()
-    frame =  piCam.capture_array()
+    _, frame = cap.read()
     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+    # call image classifier here.
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
     video_label.imgtk = imgtk
     video_label.configure(image=imgtk)
-    video_label.after(100, update_video_frame)
+    video_label.after(5000, update_video_frame)
 
-def update_baby_status():
-    riskAss.update(frame = piCam.capture_array)
-    isFace = riskAss.is_face()
- 
+
+def update_audio_classification():
+    # Simulated audio-based classification output
+    #record 10 seconds of video and call audio classifier
     
 
+    is_baby_detected = (random.random() - 0.5) > 0.0
+    if is_baby_detected:
+        boolEvent = "Baby detected"
+        detectedClass = "Baby Crying"
+    else:
+        boolEvent = "No Baby detected"
+        detectedClass = "Noise"
+    audio_class_text.set(value=f"{boolEvent}\ndetectedClass: {detectedClass}")
+    audio_classification_label.after(5000, update_audio_classification)
 
-lcd_1602.init(0x27, 1)
-gpio.setmode(gpio.BCM)
-myDHT = dht11.DHT11(pin = 17)
+def textParentCell():
+    print("texting parent")
+    pass
 
-riskAss = RA()
+def informParent():
+    if badCounter > 10:
+        textParentCell()
 
-piCam = Picamera2()
-piCam.preview_configuration.main.size = (1280, 720)
-piCam.preview_configuration.main.format = "RGB888"
-piCam.preview_configuration.align()
-piCam.configure("preview")
-piCam.start()  
+def warningSign(t, a, c):
+    if (t > 30) and a and c:
+        return 3
+    elif (t > 30) and a:
+        return 2
+    elif (t > 30) and c:
+        return 2
+    elif (a):
+        return 1 # baby is crying but temp is ok.
+    else:
+        return 0
+
+def update_bad_counter():
+    incr = warningSign(temperature, audioEvent, cameraEvent)
+    if incr > 0:
+        badCounter += incr # increment counter
+    else:
+        badCounter = 0 #reset counter
 
 root = tk.Tk()
+root.configure(bg='blue')
 root.title("Temperature, Humidity, and Video Display")
+
+# Simulated video capture (replace with actual camera/video source)
+cap = cv2.VideoCapture(0)
+
+audioEvent = False
+cameraEvent = False
+badCounter = 0
 
 # Create labels for temperature/humidity and video frame
 temperature = 25.5
 humidity = 60.0
-isFace = False
-TH_text = tk.StringVar(value=f"Temperature: {temperature}ºC\nHumidity: {humidity}%\nIs Face: {isFace}")
+TH_text = tk.StringVar(value=f"Temperature: {temperature:3.1f}°C\nHumidity: {humidity:3.1f}%")
 
 temperature_label = ttk.Label(root, font=("Helvetica", 12),textvariable=TH_text)
 temperature_label.pack(side = tk.LEFT,ipadx=30, ipady=6)
+
+audio_class_text = tk.StringVar(value="No Baby detected\nNoise")
+audio_classification_label = ttk.Label(root, font=("Helvetica", 12),textvariable=audio_class_text)
+audio_classification_label.pack()
 
 video_label = ttk.Label(root)
 video_label.pack(side = tk.RIGHT,ipadx=30, ipady=6)
@@ -68,6 +95,7 @@ video_label.pack(side = tk.RIGHT,ipadx=30, ipady=6)
 # Start updating temperature/humidity and video frame
 update_temperature_humidity()
 update_video_frame()
-update_baby_status()
+update_audio_classification()
+update_bad_counter()
 
 root.mainloop()
