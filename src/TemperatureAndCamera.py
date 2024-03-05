@@ -45,6 +45,8 @@ try:
             lcd_1602.write(0,1, "Warn! High Temp!")
             if isFaceDetected:
                 lcd_1602.write(0,1, "Danger! Baby in High Temp!")
+            #if isAudioDetected()
+                #lcd_1602.write(something)
         else:
             if isFaceDetected:
                 lcd_1602.write(0,1, "Warn! Baby onboard!")
