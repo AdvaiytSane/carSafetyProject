@@ -40,11 +40,29 @@ try:
         print("finished recorikng!!")
 
 
+        print("ended recrodingkn")
         riskAss.update(t, frame, audioSample)
         message = riskAss.notify()
         print(message, " <--- message btw")
         lcd_1602.write(0,1, message)
 
+        # isFaceDetected = riskAss.is_face()    
+        # if isFaceDetected:
+        #     # Overlay facedetection on image
+        #     face_locations = riskAss.get_face()
+        #     # print("baby detected and temperature above 80 degrees! Please check your car. ")
+        #     for x, y, w, h  in face_locations:
+        #         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        # if riskAss.temp_warning():
+        #     print("Warn! High Temp!")
+        #     if isFaceDetected:
+        #         lcd_1602.write(0,1, "Danger! Baby in High Temp!")
+        # else:
+        #     if isFaceDetected:
+        #         lcd_1602.write(0,1, "Warn! Baby onboard!")
+        #     else:
+        #         lcd_1602.write(0,1, "  Safe!       ")
+        
         cv2.imshow("piCam", frame)
 
         if cv2.waitKey(1) == ord('q'):
