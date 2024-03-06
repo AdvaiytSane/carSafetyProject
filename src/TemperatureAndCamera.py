@@ -8,6 +8,8 @@ import lcd_1602
 from RiskAssessment import RiskAssessment
 import sounddevice as sd
 import audioAssesment
+import requests
+
 
 lcd_1602.init(0x27, 1)
 
@@ -35,24 +37,24 @@ try:
             lcd_1602.write(0,0, "Temp is {0}".format(t))
             
         frame =  piCam.capture_array()
-        print("started recorikng!!")
+        print("started recording!!")
         audioSample = audioAssesment.recordSample()
-        print("finished recorikng!!")
-
-
-        print("ended recrodingkn")
+        print("finished recording!!")
         riskAss.update(t, frame, audioSample)
         message = riskAss.notify()
-        print(message, " <--- message btw")
+        resp = requests.post('https://textbelt.com/text', {
+                     'phone': '6692514210',
+                     'message': message,
+                     'key': 'af71119ada56b527242e3f862f3e4e400817350bO0eyayo2OU1Ljs7Ums3bWbmvd',
+                     })
         lcd_1602.write(0,1, message)
-
-        # isFaceDetected = riskAss.is_face()    
-        # if isFaceDetected:
-        #     # Overlay facedetection on image
-        #     face_locations = riskAss.get_face()
-        #     # print("baby detected and temperature above 80 degrees! Please check your car. ")
-        #     for x, y, w, h  in face_locations:
-        #         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        isFaceDetected = riskAss.is_face()    
+        if isFaceDetected:     
+            # Overlay facedetection on image
+            face_locations = riskAss.get_face()
+            # print("baby detected and temperature above 80 degrees! Please check your car. ")
+            for x, y, w, h  in face_locations:
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
         # if riskAss.temp_warning():
         #     print("Warn! High Temp!")
         #     if isFaceDetected:
