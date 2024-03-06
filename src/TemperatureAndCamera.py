@@ -35,14 +35,17 @@ try:
             lcd_1602.write(0,0, "Temp is {0}".format(t))
             
         frame =  piCam.capture_array()
-
+        print("started recorikng!!")
         audioSample = audioAssesment.recordSample()
+        print("finished recorikng!!")
+
 
         riskAss.update(t, frame, audioSample)
         message = riskAss.notify()
+        print(message, " <--- message btw")
         lcd_1602.write(0,1, message)
 
-        # cv2.imshow("piCam", frame)
+        cv2.imshow("piCam", frame)
 
         if cv2.waitKey(1) == ord('q'):
             break

@@ -1,4 +1,4 @@
-import lcd_1602
+import lcd_1602 as lcd_1602
 import time
 
 lcd_1602.init(0x27, 1)
