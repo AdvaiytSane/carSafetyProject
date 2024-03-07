@@ -12,6 +12,7 @@ class RiskAssessment:
         self.face = None
         self.audio = audio
         self.babyNoise = None
+        self.hazard = False
 
     def get_temp(self):
         return self.temp
@@ -21,6 +22,17 @@ class RiskAssessment:
     
     def get_face(self):
         return self.face
+    
+    def updateImageFrame(self, frame):
+        self.frame = frame
+        self.face_detection()
+    
+    def updateAudioSample(self, audio):
+        self.audio = audio
+        self.audio_detection()
+
+    def updateTemp(self, temp):
+        self.temp = temp
     
     def update(self, temp = None, frame = None, audio=None):
         self.temp = temp
@@ -49,12 +61,17 @@ class RiskAssessment:
         return self.babyNoise
     
     def notify(self):
-        # if self.get_temp() > 20: 
-        if self.is_face():
+        if self.get_temp() > 20: 
+            if self.is_face():
+                self.hazard = True
+                if self.is_baby_cry():
+                    return "!!Hot,Cry,Face!"
+                return "!!Hot and Face!"
             if self.is_baby_cry():
-                return "!!Hot,Cry,Face!"
-            return "!!Hot and Face!"
-        if self.is_baby_cry():
-            return "!!Hot and Cry!"
-        return "Hot Car no baby"
-        # return "temp is fine"
+                self.hazard = True
+                return "!!Hot and Cry!"
+            self.hazard = False
+            return "Hot Car no baby"
+
+        self.hazard = False
+        return "temp is fine"

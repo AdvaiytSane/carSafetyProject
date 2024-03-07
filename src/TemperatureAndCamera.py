@@ -32,7 +32,6 @@ try:
         if result.is_valid():
             t = result.temperature
             h = result.humidity
-            isValdTemp = True
             print("Temperature is " , t, h," at ", time.time())
             lcd_1602.write(0,0, "Temp is {0}".format(t))
             

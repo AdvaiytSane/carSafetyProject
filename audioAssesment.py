@@ -41,7 +41,6 @@ def classifyAudio(play_list):
         play_list_processed.append(tmp)
 
     
-
     predictor = BabyCryPredictor(model)
 
     # predictions = list()
