@@ -3,7 +3,7 @@ import audioAssesment
 
 
 class RiskAssessment:
-    def __init__(self, temp=None, frame=None, audio=None):
+    def __init__(self, temp=0, frame=None, audio=None):
         self.temp = temp
         self.frame = frame
         # self.face_classifier = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -29,11 +29,15 @@ class RiskAssessment:
     
     def updateAudioSample(self, audio):
         self.audio = audio
-        self.audio_detection()
 
     def updateTemp(self, temp):
         self.temp = temp
     
+    def runClassification(self):
+        self.face_detection()
+        self.audio_detection()
+
+
     def update(self, temp, frame, audio):
         self.temp = temp
         self.frame = frame
@@ -52,7 +56,7 @@ class RiskAssessment:
         self.babyNoise = audioAssesment.classifyAudio(audioAssesment.offsetSample(modAudio))
 
     def is_face(self):
-        return self.face!=()
+        return (self.face is not None)
     
     def temp_warning(self):
         return self.temp > 80

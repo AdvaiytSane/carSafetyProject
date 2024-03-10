@@ -20,26 +20,38 @@ from RiskAssessment import RiskAssessment
 import audioAssesment
 
 def update_temperature_humidity():
-    # Simulated temperature and humidity values (update with real values)
-    TH_text.set(value=f"Temperature: {temperature:3.1f}°C\nHumidity: {humidity:3.1f}% \n Time: {time.time()}")
-    temperature_label.after(10000, update_temperature_humidity)
+    result = myDHT.read()
+    if result.is_valid():
+        temperature = result.temperature
+        humidity = result.humidity
+        riskAss.updateTemp(temperature)
+        lcd_1602.write(0,0, "Temp is {0}".format(temperature))
+        # Simulated temperature and humidity values (update with real values)
+        TH_text.set(value=f"Temperature: {temperature:3.1f}°C\nHumidity: {humidity:3.1f}% \n Time: {time.time()}")
+    temperature_label.after(100, update_temperature_humidity)
 
 def update_video_frame():
-    frame = riskAss.get_raw_frame()
-    # if faces are detected, then add bounding boxes
-    if riskAss.is_face():
-        face_locations = riskAss.get_face()
-        for x, y, w, h  in face_locations:
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        
+    frame = piCam.capture_array()
+    # frame = riskAss.get_raw_frame()
+    if frame is not None:
+        riskAss.updateImageFrame(frame)
+        # if faces are detected, then add bounding boxes
+        if riskAss.is_face():
+            # process_status_label.set(value="Face Detected")
+            face_locations = riskAss.get_face()
+            for x, y, w, h  in face_locations:
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        # else:
+            # process_status_label.set(value="No Face Detected")
 
-    # Update GUI
-    cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-    img = Image.fromarray(cv2image)
-    imgtk = ImageTk.PhotoImage(image=img)
-    video_label.imgtk = imgtk
-    video_label.configure(image=imgtk)
-    video_label.after(5000, update_video_frame)
+            
+        # # Update GUI
+        cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+        img = Image.fromarray(cv2image)
+        imgtk = ImageTk.PhotoImage(image=img)
+        video_label.imgtk = imgtk
+        video_label.configure(image=imgtk)
+    video_label.after(250, update_video_frame)
 
 
 def update_audio_classification():
@@ -53,29 +65,23 @@ def update_audio_classification():
 def update_hazard_classification():
     #record 10 seconds of video and call audio classifier
     process_status_label.set(value="Audio: Recording")
-    audioSample = audioAssesment.recordSample()
+    # audioSample = audioAssesment.recordSample()
 
-    process_status_label.set(value="Camera: capture")
-    frame = piCam.capture_array()
-    process_status_label.set(value="Audio, Camera: Standby")
-
-    process_status_label.set(value="Reading Temperature")
-    result = myDHT.read()
-    if result.is_valid():
-        temperature = result.temperature
-        humidity = result.humidity
-        lcd_1602.write(0,0, "Temp is {0}".format(temperature))
+    # process_status_label.set(value="Camera: capture")
     
-    process_status_label.set(value="Risk assement sensor update")
+    # process_status_label.set(value="Audio, Camera: Standby")
 
-    riskAss.update(temperature, frame, audioSample)
+    # process_status_label.set(value="Reading Temperature")
+    # process_status_label.set(value="Risk assement sensor update")
+
+    riskAss.runClassification()
     message = riskAss.notify()
     if riskAss.hazard:
         textParentCell(message)
         process_status_label.set(value="Sent notification to guarandian")
     else:
         process_status_label.set(value="Standby")
-    hazard_classification_label.after(5000, update_hazard_classification)
+    hazard_classification_label.after(200, update_hazard_classification)
 
 
 def textParentCell(message):
@@ -107,10 +113,6 @@ piCam.start()
 
 riskAss = RiskAssessment()
 
-# Simulated video capture (replace with actual camera/video source)
-cap = cv2.VideoCapture(0)
-
-
 # Create labels for temperature/humidity, audio and video frame
 temperature = 25.5
 humidity = 60.0
@@ -133,7 +135,12 @@ hazard_classification_label.pack()
 # Start updating temperature/humidity and video frame
 update_temperature_humidity()
 update_video_frame()
-update_audio_classification()
-update_hazard_classification()
+# update_audio_classification()
+# update_hazard_classification()
 
 root.mainloop()
+
+gpio.cleanup()
+print("gpio good to go lesgo")
+lcd_1602.clear()
+print("Hrun dzat shiet baeck")

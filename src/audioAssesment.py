@@ -14,7 +14,7 @@ with open((os.path.join('./data/audio_model/model.pkl')), 'rb') as fp:
     model = pickle.load(fp)
 
 def recordSample():
-    duration = 10  # seconds
+    duration = 6  # seconds
     myrecording = sd.rec(int(duration * sr), samplerate=sr, channels=1)
     sd.wait()
     return myrecording.flatten()

@@ -7,7 +7,7 @@ t = 0
 
 try:
     while True:
-        print("reading at :", time.time())
+        # print("reading at :", time.time())
         result = myDHT.read()
         if result.is_valid():
             t = result.temperature

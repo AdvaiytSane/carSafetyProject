@@ -10,13 +10,26 @@ import sounddevice as sd
 import audioAssesment
 import requests
 
-
 lcd_1602.init(0x27, 1)
-
-    
+   
 gpio.setmode(gpio.BCM)
 myDHT = dht11.DHT11(pin = 17)
 t = 0
+cnt = 20
+try:
+    while cnt > 10:
+        # print("reading at :", time.time())
+        result = myDHT.read()
+        if result.is_valid():
+            t = result.temperature
+            h = result.humidity
+            print("Temperature is " , t, h," at ", time.time())
+        time.sleep(0.2)
+        cnt  = cnt -1
+
+except KeyboardInterrupt:
+    gpio.cleanup()
+    print("gpio good to go lesgo")
 
 piCam = Picamera2()
 piCam.preview_configuration.main.size = (1280, 720)
@@ -41,11 +54,12 @@ try:
         print("finished recording!!")
         riskAss.update(t, frame, audioSample)
         message = riskAss.notify()
-        resp = requests.post('https://textbelt.com/text', {
-                     'phone': '6692514210',
-                     'message': message,
-                     'key': 'af71119ada56b527242e3f862f3e4e400817350bO0eyayo2OU1Ljs7Ums3bWbmvd',
-                     })
+        if False:
+            resp = requests.post('https://textbelt.com/text', {
+                        'phone': '6692514210',
+                        'message': message,
+                        'key': 'af71119ada56b527242e3f862f3e4e400817350bO0eyayo2OU1Ljs7Ums3bWbmvd',
+                        })
         lcd_1602.write(0,1, message)
         isFaceDetected = riskAss.is_face()    
         if isFaceDetected:     
