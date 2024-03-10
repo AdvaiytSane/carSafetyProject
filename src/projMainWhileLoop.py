@@ -24,13 +24,14 @@ piCam.start()
 riskAss = RiskAssessment()
 
 idTask = 0 #0: Temp, #1: Camera, #2, Audio
-timePeriods = [2.0, 4.0, 6.0] # Time Periods for each tasks
+timePeriods = [4.0, 6.0, 6.0] # ms Time Periods for each tasks
 
 try:
     while True:
         if idTask == 0: # Temperature update
             startTime = time.time()
-            while time.time() > startTime + timePeriods[idTask]:
+            print(f"Running Temp Task at {startTime}")
+            while time.time() < startTime + timePeriods[idTask]:
                 # print("attempted reading at :", time.time())
                 result = myDHT.read()
                 if result.is_valid():
@@ -41,7 +42,8 @@ try:
                     lcd_1602.write(0,0, "Temp is {0}".format(t))
         elif idTask == 1: # cameraTask
             startTime = time.time()
-            while (time.time() > startTime + timePeriods[idTask]):
+            print(f"Running Camera Task at {startTime}")
+            while (time.time() < startTime + timePeriods[idTask]):
                 frame =  piCam.capture_array()
                 riskAss.updateImageFrame(frame)
                 isFaceDetected = riskAss.is_face()    
@@ -49,10 +51,12 @@ try:
                     face_locations = riskAss.get_face()
                     for x, y, w, h  in face_locations:
                         cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-                cv2.imshow("piCam", frame)
-                time.sleep(0.05)
-        elif (idTask == 2): # Audio Task            
-            startTime = time.time()
+                cv2.imshow("piCam", frame)                
+                if cv2.waitKey(1) == ord('q'):
+                    break
+        elif (idTask == 2): # Audio Task           
+            startTime = time.time()    
+            print(f"Running Audio Task at {startTime}")         
             print("started recording at {startTime}!!")
             audioSample = audioAssesment.recordSample()
             riskAss.updateAudioSample(audioSample)
