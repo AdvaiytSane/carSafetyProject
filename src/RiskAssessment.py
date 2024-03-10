@@ -34,7 +34,7 @@ class RiskAssessment:
     def updateTemp(self, temp):
         self.temp = temp
     
-    def update(self, temp = None, frame = None, audio=None):
+    def update(self, temp, frame, audio):
         self.temp = temp
         self.frame = frame
         self.audio = audio
@@ -48,7 +48,7 @@ class RiskAssessment:
         self.face = self.face_classifier.detectMultiScale(gray_image, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
 
     def audio_detection(self):
-        modAudio = self.audio * .8 /(self.audio.max() - self.audio.min())
+        modAudio = self.audio * 1.6 /(self.audio.max() - self.audio.min())
         self.babyNoise = audioAssesment.classifyAudio(audioAssesment.offsetSample(modAudio))
 
     def is_face(self):
@@ -61,6 +61,7 @@ class RiskAssessment:
         return self.babyNoise
     
     def notify(self):
+        self.hazard = False
         if self.get_temp() > 20: 
             if self.is_face():
                 self.hazard = True
@@ -72,6 +73,8 @@ class RiskAssessment:
                 return "!!Hot and Cry!"
             self.hazard = False
             return "Hot Car no baby"
-
-        self.hazard = False
         return "temp is fine"
+
+
+
+
