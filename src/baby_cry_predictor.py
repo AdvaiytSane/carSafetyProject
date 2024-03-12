@@ -25,6 +25,7 @@ class BabyCryPredictor:
         """
 
         category = self.model.predict(new_signal)
+        print(category)
 
         # category is an array of the kind array(['004 - Baby cry'], dtype=object)
         return self._is_baby_cry(category[0])
@@ -38,8 +39,9 @@ class BabyCryPredictor:
         """
 
         match = re.search('Crying baby', string)
+        is_laugh = re.search('laugh', string)
 
-        if match:
+        if match or is_laugh:
             return 1
         else:
             return 0

@@ -40,6 +40,7 @@ try:
                     print("Temperature is " , t, h," at ", time.time())
                     riskAss.updateTemp(t)
                     lcd_1602.write(0,0, "Temp is {0}".format(t))
+                    break
         elif idTask == 1: # cameraTask
             startTime = time.time()
             print(f"Running Camera Task at {startTime}")
@@ -54,14 +55,16 @@ try:
                 cv2.imshow("piCam", frame)                
                 if cv2.waitKey(1) == ord('q'):
                     break
+                if isFaceDetected: # break on first face detection
+                    break
         elif (idTask == 2): # Audio Task           
             startTime = time.time()    
             print(f"Running Audio Task at {startTime}")         
-            print("started recording at {startTime}!!")
+            print(f"started recording at {startTime}!!")
             audioSample = audioAssesment.recordSample()
             riskAss.updateAudioSample(audioSample)
             duration = time.time() - startTime
-            print("finished recording and classification in {duration} sec.")
+            print(f"finished recording and classification in {duration} sec.")
         else:
             print("ERROR: incorrect idTask")
 

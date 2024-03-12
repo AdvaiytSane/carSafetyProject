@@ -1,5 +1,6 @@
 import cv2
 import audioAssesment
+import numpy as np
 
 
 class RiskAssessment:
@@ -29,6 +30,7 @@ class RiskAssessment:
     
     def updateAudioSample(self, audio):
         self.audio = audio
+        self.audio_detection()
 
     def updateTemp(self, temp):
         self.temp = temp
@@ -50,14 +52,19 @@ class RiskAssessment:
         # print(gray_image.shape)
         # self.face = self.face_classifier.detectMultiScale(gray_image, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
         self.face = self.face_classifier.detectMultiScale(gray_image, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
+        print("face detection = ", self.face)
 
     def audio_detection(self):
-        modAudio = self.audio * 1.6 /(self.audio.max() - self.audio.min())
+        amp = np.abs(self.audio.max() - self.audio.min())
+        print(amp, self.audio.max(), self.audio.min())
+        modAudio = self.audio * 1.2 /amp
         self.babyNoise = audioAssesment.classifyAudio(audioAssesment.offsetSample(modAudio))
 
     def is_face(self):
-        return (self.face is not None)
-    
+        if (self.face is not None):
+            return (len(self.face) > 0)
+        return False
+        
     def temp_warning(self):
         return self.temp > 80
     
